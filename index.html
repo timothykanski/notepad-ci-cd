@@ -16,25 +16,26 @@
       padding: 0.5rem 1rem;
       border-radius: 4px;
     }
+    #commits {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #ccc;
+      background: rgba(0,0,0,0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      max-width: 600px;
+      line-height: 1.4;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div id="overlay">🛠️ BUILDING...</div>
 
-  <div id="commits" style="
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    font-family: monospace;
-    font-size: 0.8rem;
-    color: #ccc;
-    background: rgba(0,0,0,0.5);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    max-width: 300px;
-    line-height: 1.4;
-    display: none;
-  ">
+  <div id="commits">
     🔄 Loading commit history...
   </div>
 
@@ -124,23 +125,66 @@
     }, 2000); // 1000ms is 1 second
 
     // GitHub Commits API
-    fetch('https://api.github.com/repos/timothykanski/notepad-ci-cd/commits')
-      .then(res => res.json())
-      .then(commits => {
-        const commitList = commits.slice(0, 5).map(commit => {
-          const sha = commit.sha.substring(0, 7);
-          const msg = commit.commit.message.split('\n')[0];
-          const author = commit.commit.author.name;
-          return `✔ ${sha} - ${msg} (${author})`;
-        }).join('<br>');
-        document.getElementById("commits").innerHTML = `
-          📦 Latest Deploys:<br>${commitList}
-        `;
-      })
-      .catch(err => {
-        document.getElementById("commits").innerText = "⚠️ Could not load commits.";
-        console.error("GitHub API error:", err);
-      });
+// GitHub Commits API
+fetch('https://api.github.com/repos/timothykanski/notepad-ci-cd/commits')
+  .then(res => res.json())
+  .then(commits => {
+    const commitList = commits.slice(0, 5).map(commit => {
+      const sha = commit.sha.substring(0, 7);
+      const fullSha = commit.sha;
+      const msg = commit.commit.message.split('\n')[0];
+      const author = commit.commit.author.name;
+      const authorAvatar = commit.author?.avatar_url;
+      const authorUrl = commit.author?.html_url;
+      const timestamp = new Date(commit.commit.author.date);
+      const timeAgo = timeSince(timestamp);
+
+      return `
+        <div style="margin-bottom: 0.5em;">
+          <a href="https://github.com/timothykanski/notepad-ci-cd/commit/${fullSha}" target="_blank" style="text-decoration: none; color: inherit;" title="${msg}\n${timestamp}">
+            <code style="font-weight: bold;">${sha}</code>
+
+            — ${highlightCommitMessage(msg)}
+            <span title="${timestamp.toLocaleString()}">🕒 ${timeAgo}</span>
+          </a>
+          ${authorAvatar ? `<a href="${authorUrl}" target="_blank"><img src="${authorAvatar}" alt="${author}" width="16" height="16" style="border-radius: 50%; vertical-align: middle; margin-left: 4px;" title="${author}"></a>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById("commits").innerHTML = `
+      <strong>📦 Latest Deploys:</strong><br>${commitList}
+    `;
+  })
+  .catch(err => {
+    document.getElementById("commits").innerText = "⚠️ Could not load commits.";
+    console.error("GitHub API error:", err);
+  });
+
+// Helper function: relative time
+function timeSince(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  const intervals = [
+    [31536000, 'y'], [2592000, 'mo'], [86400, 'd'], 
+    [3600, 'h'], [60, 'm'], [1, 's']
+  ];
+  for (const [secs, label] of intervals) {
+    const count = Math.floor(seconds / secs);
+    if (count >= 1) return `${count}${label} ago`;
+  }
+  return 'just now';
+}
+
+// Helper function: tag highlight
+function highlightCommitMessage(msg) {
+  const tag = msg.toLowerCase().split(' ')[0];
+  if (tag.includes('fix')) return `🛠️ <span style="color:#f28b82;">${msg}</span>`;
+  if (tag.includes('deploy')) return `🚀 <span style="color:#64b5f6;">${msg}</span>`;
+  if (tag.includes('feature')) return `✨ <span style="color:#81c784;">${msg}</span>`;
+  return msg;
+}
+
+
   </script>
 </body>
 </html>
