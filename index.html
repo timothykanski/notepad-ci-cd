@@ -84,23 +84,34 @@ async function fetchMetadata(filename) {
 
 async function loadBlogIndex() {
   const listEl = document.getElementById('blog-list');
-  const posts = [];
 
-  for (const file of blogFiles) {
-    const meta = await fetchMetadata(file);
-    if (meta) posts.push(meta);
+  try {
+    const res = await fetch('blog/files.json');
+    const posts = await res.json();
+
+    // Clean up
+    posts.forEach(post => {
+      for (let key in post) {
+        if (typeof post[key] === 'string') {
+          post[key] = post[key].replace(/\r/g, '');
+        }
+      }
+    }
+
+    // Sort newest first
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    listEl.innerHTML = posts.map(post => `
+      <div class="post">
+        <a onclick="showPost('${post.slug}')">${post.title}</a>
+        <small>${post.date}</small>
+        <p>${post.description}</p>
+      </div>
+    `).join('');
+  } catch (err) {
+    listEl.innerHTML = `p style="color: red;">Failed to load blog index.</p>`;
+    console.error("Failed to fetch blog index: ", err);
   }
-
-  // Sort newest first
-  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  listEl.innerHTML = posts.map(post => `
-    <div class="post">
-      <a onclick="showPost('${post.slug}')">${post.title}</a>
-      <small>${post.date}</small>
-      <p>${post.description}</p>
-    </div>
-  `).join('');
 }
 
 async function showPost(slug) {
