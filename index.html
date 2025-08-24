@@ -45,7 +45,7 @@
 
   <script>
 
-    setTimeout(() => location.reload(), 10000); // 5000ms is 5 seconds
+    setTimeout(() => location.reload(), 15000); // 15000ms is 15 seconds
 
     // Setup
     const scene = new THREE.Scene();
@@ -70,7 +70,7 @@
 
     // Cube
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ffcc });
+    const material = new THREE.MeshStandardMaterial({ color: 0x00eedd });
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
