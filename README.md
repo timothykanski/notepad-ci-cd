@@ -9,9 +9,9 @@ This is a zero-config website deployed from Notepad using GitHub Pages and GitHu
 
 ## 🛠 How It Works
 
-1. Edit `index.html` in Notepad.
+1. Edit `index.html` in Notepad (or your favorite IDE, if you insist...)
 2. Save.
-3. Run `deploy.ps1` (or commit manually).
+3. Run `deployclient.ps1` (or commit manually).
 4. GitHub Pages auto-deploys your changes globally.
 
 ## 📦 What You Get
@@ -34,3 +34,4 @@ This is a zero-config website deployed from Notepad using GitHub Pages and GitHu
 
 You can fork this repo, change the visuals, hook into APIs, or embed anything you want.
 It’s just HTML + GitHub magic.
+
