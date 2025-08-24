@@ -4,14 +4,18 @@ $watcher.Filter = "*"
 $watcher.EnableRaisingEvents = $true
 
 Register-ObjectEvent $watcher 'Changed' -Action {
-  Start-Sleep -Milliseconds 100  # debounce
+    Start-Sleep -Milliseconds 100  # debounce
 
-  $changedFile = $Event.SourceEventArgs.Name
-  $timestamp = Get-Date -Format 'HH:mm:ss'
+    $changedFile = $Event.SourceEventArgs.Name
+    $timestamp = Get-Date -Format 'HH:mm:ss'
 
-  git add .
-  git commit -m "Auto-commit from $changedFile at $timestamp"
-  git push
+    try {
+      git add .
+      git commit -m $commitMsg
+      git push
+      Write-Host "Auto-commit and push triggered by file change: $changedFile @ $timestamp"
+    } catch {
+      Write-Host "Push failed. Try pulling latest changes with 'git pull' and resolve conflicts if needed."
+    }
 
-  Write-Host "Auto-commit and push triggered by file change: $changedFile @ $timestamp"
 }
