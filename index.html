@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Reflex Blog</title>
+  <title>My Blog</title>
   <style>
     body {
       font-family: sans-serif;
@@ -49,7 +49,7 @@
 </head>
 <body>
 
-<h1 id="blog-title">📘 Reflex Blog</h1>
+<h1 id="blog-title">📘 Blog</h1>
 <div id="blog-list">Loading blog posts...</div>
 <div id="content" style="display: none;"></div>
 <div id="back" style="display: none;" onclick="goHome()">Back</div>
@@ -114,6 +114,7 @@ async function showPost(slug) {
   const content = text.replace(/^---[\s\S]*?---/, '').trim();
   const html = marked.parse(content);
 
+  document.title = post.title + ' | My Blog'
   document.getElementById('blog-list').style.display = 'none';
   document.getElementById('blog-title').innerText = '';
   document.getElementById('content').style.display = 'block';
@@ -124,6 +125,7 @@ async function showPost(slug) {
 }
 
 function goHome() {
+  document.title = 'My Blog';
   history.pushState({}, '', window.location.pathname);
   document.getElementById('blog-list').style.display = 'block';
   document.getElementById('blog-title').innerText = '📘 Reflex Blog';
