@@ -13,6 +13,8 @@ function Trigger-Deploy($changeType, $changedFile){
 
     Write-Host "Detected: $changeType → $changedFile"
 
+    Update-BlogManifest
+
     git add .
 
     # Check if there is anything to commit.
@@ -30,6 +32,47 @@ function Trigger-Deploy($changeType, $changedFile){
       Write-Host "Push failed. Try 'git pull' and resolve any merge conflicts."
     }
 }
+
+function Update-BlogManifest {
+    $blogDir = "blog"
+    $manifest = @()
+
+    # Loop through all markdown files in /blog
+    Get-ChildItem "$blogDir\*.md" | ForEach-Object {
+        $file = $_.FullName
+        $filename = $_.Name
+        $slug = [System.IO.Path]::GetFileNameWithoutExtension($filename)
+
+        $content = Get-Content $file -Raw
+
+        # Extract YAML frontmatter
+        if ($content -match "^---\s*([\s\S]*?)\s*---") {
+            $metaBlock = $matches[1]
+            $meta = @{}
+            foreach ($line in $metaBlock -split "`n") {
+                if ($line -match "^\s*(\w+)\s*:\s*(.+)$") {
+                    $key = $matches[1]
+                    $value = $matches[2]
+                    $meta[$key] = $value
+                }
+            }
+
+            # Build entry
+            $manifest += [PSCustomObject]@{
+                filename    = $filename
+                slug        = $slug
+                title       = $meta.title
+                date        = $meta.date
+                description = $meta.description
+            }
+        }
+    }
+
+    # Export to JSON
+    $manifest | ConvertTo-Json -Depth 2 | Out-File "$blogDir\files.json" -Encoding utf8
+    Write-Host "Blog manifest generated at $blogDir\files.json"
+}
+
 
 Register-ObjectEvent $watcher 'Changed' -Action {
     if ($Event.SourceEventArgs.FullPath -match '\\\.git\\') {
