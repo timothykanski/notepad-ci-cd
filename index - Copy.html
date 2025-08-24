@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🚀 Spinning Cube - Deployed from Notepad</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+    #overlay {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      color: white;
+      font-family: monospace;
+      background: rgba(0,0,0,0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+    }
+    #commits {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #ccc;
+      background: rgba(0,0,0,0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      max-width: 500px;
+      max-width: 800px;
+      line-height: 1.4;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">🛠️ BUILDING...</div>
+
+  <div id="commits">
+    🔄 Loading commit history...
+  </div>
+
+
+
+  <!-- Three.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+  <script>
+
+    setTimeout(() => location.reload(), 15000); // 15000ms is 15 seconds
+
+    // Setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    const camera = new THREE.PerspectiveCamera(
+      75, window.innerWidth / window.innerHeight, 0.1, 1000
+    );
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x404040);
+    scene.add(ambient);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(3, 2, 1);
+    scene.add(light);
+
+    // Cube
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshStandardMaterial({ color: 0x00eedd });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // Build flag
+    let loading = true;
+    let t = 0;
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (loading) {
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        t += 0.01;
+        camera.position.x = Math.sin(t) * 5;
+        camera.position.z = Math.cos(t) * 5;
+        camera.lookAt(cube.position);
+        renderer.render(scene, camera);
+        return;
+      }
+
+      // After loading: scene has changed
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Simulate build process
+    setTimeout(() => {
+      loading = false;
+
+      // Update overlay
+      const overlay = document.getElementById("overlay");
+      overlay.innerText = "✔️ Deployed from Notepad";
+
+      // Show commits panel
+      document.getElementById("commits").style.display = "block";
+
+      // Remove cube from scene
+      scene.remove(cube);
+
+      // (Optional: update background or add new scene here)
+    }, 2000); // 1000ms is 1 second
+
+    // GitHub Commits API
+// GitHub Commits API
+fetch('https://api.github.com/repos/timothykanski/notepad-ci-cd/commits')
+  .then(res => res.json())
+  .then(commits => {
+    const commitList = commits.slice(0, 5).map(commit => {
+      const sha = commit.sha.substring(0, 7);
+      const fullSha = commit.sha;
+      const msg = commit.commit.message.split('\n')[0];
+      const author = commit.commit.author.name;
+      const authorAvatar = commit.author?.avatar_url;
+      const authorUrl = commit.author?.html_url;
+      const timestamp = new Date(commit.commit.author.date);
+      const timeAgo = timeSince(timestamp);
+
+      return `
+        <div style="margin-bottom: 0.5em;">
+          <a href="https://github.com/timothykanski/notepad-ci-cd/commit/${fullSha}" target="_blank" style="text-decoration: none; color: inherit;" title="${msg}\n${timestamp}">
+            <code style="font-weight: bold;">${sha}</code>
+
+            — ${highlightCommitMessage(msg)}
+            <span title="${timestamp.toLocaleString()}">🕒 ${timeAgo}</span>
+          </a>
+          ${authorAvatar ? `<a href="${authorUrl}" target="_blank"><img src="${authorAvatar}" alt="${author}" width="16" height="16" style="border-radius: 50%; vertical-align: middle; margin-left: 4px;" title="${author}"></a>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById("commits").innerHTML = `
+      <strong>📦 Latest Deploys:</strong><br>${commitList}
+    `;
+  })
+  .catch(err => {
+    document.getElementById("commits").innerText = "⚠️ Could not load commits.";
+    console.error("GitHub API error:", err);
+  });
+
+// Helper function: relative time
+function timeSince(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  const intervals = [
+    [31536000, 'y'], [2592000, 'mo'], [86400, 'd'], 
+    [3600, 'h'], [60, 'm'], [1, 's']
+  ];
+  for (const [secs, label] of intervals) {
+    const count = Math.floor(seconds / secs);
+    if (count >= 1) return `${count}${label} ago`;
+  }
+  return 'just now';
+}
+
+// Helper function: tag highlight
+function highlightCommitMessage(msg) {
+  const tag = msg.toLowerCase().split(' ')[0];
+  if (tag.includes('fix')) return `🛠️ <span style="color:#f28b82;">${msg}</span>`;
+  if (tag.includes('deploy')) return `🚀 <span style="color:#64b5f6;">${msg}</span>`;
+  if (tag.includes('feature')) return `✨ <span style="color:#81c784;">${msg}</span>`;
+  return msg;
+}
+
+
+  </script>
+</body>
+</html>
