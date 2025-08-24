@@ -27,24 +27,45 @@
       display: block;
       color: #aaa;
     }
+    #content {
+      max-width: 800px;
+      line-height: 1.6;
+    }
+    #back {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #ccc;
+      cursor: pointer;
+    }
+    pre, code {
+      background: #222;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #fffdc2;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
-<h1>📘 Reflex Blog</h1>
+<h1 id="blog-title">📘 Reflex Blog</h1>
 <div id="blog-list">Loading blog posts...</div>
+<div id="content" style="display: none;"></div>
+<div id="back" style="display: none;" onclick="goHome()">Back</div>
 
 <script>
 const blogFiles = [
   'first-post.md',
   // Add more .md filenames here
+  // TODO - We will automate this so we do not have to list files manually.  Coming soon!
 ];
 
 async function fetchMetadata(filename) {
   const res = await fetch(`blog/${filename}`);
   const text = await res.text();
-
-  const metaMatch = text.match(/^---([\s\S]*?)---/);
+  const matchString = /^---([\s\S]*?)---/
+  const metaMatch = text.match(matchString);
   if (!metaMatch) return null;
 
   const metaLines = metaMatch[1].trim().split('\n');
@@ -55,6 +76,8 @@ async function fetchMetadata(filename) {
   });
 
   meta.slug = filename.replace(/\.md$/, '');
+  meta.filename = filename;
+  meta.body = text.replace(matchString, '').trim();
   return meta;
 }
 
@@ -72,14 +95,54 @@ async function loadBlogIndex() {
 
   listEl.innerHTML = posts.map(post => `
     <div class="post">
-      <a href="blog/${post.slug}.md">${post.title}</a>
+      <a onclick="showPost('${post.slug}')">${post.title}</a>
       <small>${post.date}</small>
       <p>${post.description}</p>
     </div>
   `).join('');
 }
 
-loadBlogIndex();
+async function showPost(slug) {
+  const file = blogFiles.find(f => f.startsWith(slug));
+  if (!file) {
+    document.getElementById('content').innerHTML = '<p>Post not found.</p>';
+    return;
+  }
+
+  const res = await fetch(`blog/${file}`);
+  const text = await res.text();
+  const content = text.replace(/^---[\s\S]*?---/, '').trim();
+  const html = marked.parse(content);
+
+  document.getElementById('blog-list').style.display = 'none';
+  document.getElementById('blog-title').innerText = '';
+  document.getElementById('content').style.display = 'block';
+  document.getElementById('back').style.display = 'inline-block';
+  document.getElementById('content').innerHTML = html;
+
+  history.pushState({}, '', `?post=${slug}`);
+}
+
+function goHome() {
+  history.pushState({}, '', window.location.pathname);
+  document.getElementById('blog-list').style.display = 'block';
+  document.getElementById('blog-title').innerText = '📘 Reflex Blog';
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('back').style.display = 'none';
+}
+
+// Deep link support
+function checkUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('post');
+  if (slug) {
+    showPost(slug);
+  } else {
+    loadBlogIndex();
+  }
+}
+
+checkUrl();
 </script>
 
 </body>
