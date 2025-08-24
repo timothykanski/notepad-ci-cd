@@ -1,6 +1,6 @@
 $watcher = New-Object System.IO.FileSystemWatcher
 $watcher.Path = (Get-Location).Path
-$watcher.Filter = "*.html"
+$watcher.Filter = "*"
 $watcher.EnableRaisingEvents = $true
 
 Register-ObjectEvent $watcher 'Changed' -Action {
