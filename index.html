@@ -56,12 +56,6 @@
 <div id="back" style="display: none;" onclick="goHome()">Back</div>
 
 <script>
-const blogFiles = [
-  'first-post.md',
-  // Add more .md filenames here
-  // TODO - We will automate this so we do not have to list files manually.  Coming soon!
-];
-
 async function fetchMetadata(filename) {
   const res = await fetch(`blog/${filename}`);
   const text = await res.text();
@@ -115,25 +109,33 @@ async function loadBlogIndex() {
 }
 
 async function showPost(slug) {
-  const file = blogFiles.find(f => f.startsWith(slug));
-  if (!file) {
-    document.getElementById('content').innerHTML = '<p>Post not found.</p>';
-    return;
+  try{
+    const res = await fetch(`blog/${file}`);
+    const posts = await res.json();
+    const post = posts.find(p => p.slug === slug);
+
+    if(!post) {
+      document.getElementById('content').innerHTML = '<p>Post Not Found</p>';
+      return;
+    }
+
+    const fileRes = await fetch(`blog\${post.filename}`);
+    const text = await fileRes.text();
+    const content = text.replace(/^---[\s\S]*?---/, '').trim();
+    const html = marked.parse(content);
+
+    document.title = post.title + ' | My Blog'
+    document.getElementById('blog-list').style.display = 'none';
+    document.getElementById('blog-title').innerText = '';
+    document.getElementById('content').style.display = 'block';
+    document.getElementById('back').style.display = 'inline-block';
+    document.getElementById('content').innerHTML = html;
+
+    history.pushState({}, '', `?post=${slug}`);
+  } catch (err) {
+    document.getElementById('content').innerHTML = '<p>Error loading post.</p>';
+    console.error("Failed to load blog post:", err);
   }
-
-  const res = await fetch(`blog/${file}`);
-  const text = await res.text();
-  const content = text.replace(/^---[\s\S]*?---/, '').trim();
-  const html = marked.parse(content);
-
-  document.title = post.title + ' | My Blog'
-  document.getElementById('blog-list').style.display = 'none';
-  document.getElementById('blog-title').innerText = '';
-  document.getElementById('content').style.display = 'block';
-  document.getElementById('back').style.display = 'inline-block';
-  document.getElementById('content').innerHTML = html;
-
-  history.pushState({}, '', `?post=${slug}`);
 }
 
 function goHome() {
