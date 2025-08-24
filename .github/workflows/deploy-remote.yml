@@ -10,8 +10,11 @@ permissions:
   pages: write
   id-token: write
 
+
 jobs:
   deploy:
+    environment:
+      name: github-pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
