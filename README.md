@@ -20,7 +20,7 @@ This is a zero-config website deployed from Notepad using GitHub Pages and GitHu
 - 🌍 Free global CDN hosting via GitHub Pages
 - 🔄 Auto-preview and commit history dashboard (optional)
 - 🧪 Visual diff views between commits (optional)
-- 🎨 Fully open-source, hackable
+- 🎨 Fully open-source, hackable!
 
 ## 🧪 Example Use Cases
 
@@ -34,4 +34,5 @@ This is a zero-config website deployed from Notepad using GitHub Pages and GitHu
 
 You can fork this repo, change the visuals, hook into APIs, or embed anything you want.
 It’s just HTML + GitHub magic.
+
 
