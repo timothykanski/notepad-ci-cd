@@ -1,7 +1,7 @@
 ﻿$watcher = New-Object System.IO.FileSystemWatcher
 $watcher.Path = (Get-Location).Path
 $watcher.Filter = "*"
-$watcher.NotifyFilter = [IO.NotifyFilters]'FileName, LastWrite'
+$watcher.NotifyFilter = [IO.NotifyFilters]'FileName, LastWrite, Size, Attributes, CreationTime'
 $watcher.IncludeSubdirectories = $true
 $watcher.EnableRaisingEvents = $true
 
