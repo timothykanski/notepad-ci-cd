@@ -8,7 +8,7 @@ A fully deployable static site, built and deployed with nothing but **Notepad**,
 - Just HTML, imagination… and the internet’s most misunderstood tool.
 
 Check out the running version here:  
-**[timothykanski.github.io/notepad-ci-cd](https://timothykanski.github.io/notepad-ci-cd)**
+🌐 **[timothykanski.github.io/notepad-ci-cd](https://timothykanski.github.io/notepad-ci-cd)**
 
 ## 🛠 How It Works
 
@@ -125,6 +125,7 @@ Hack it. Fork it. Ship something weird.
      ---
      ```
    - Save the file — the script will detect it, rebuild the manifest, and auto-deploy.
+
 
 
 
