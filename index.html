@@ -81,7 +81,8 @@ async function loadBlogIndex() {
 
   try {
     const res = await fetch('blog/files.json');
-    const posts = await res.json();
+    const postsWrapper = await res.json();
+    const posts = postsWrapper.value;
 
     // Clean up
     posts.forEach(post => {
@@ -111,7 +112,8 @@ async function loadBlogIndex() {
 async function showPost(slug) {
   try{
     const res = await fetch(`blog/files.json`);
-    const posts = await res.json();
+    const postsWrapper = await res.json();
+    const posts = postsWrapper.value;
     const post = posts.find(p => p.slug === slug);
 
     if(!post) {

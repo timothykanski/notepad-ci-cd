@@ -95,7 +95,7 @@ function Update-BlogManifest {
     }
 
     # Convert new manifest to JSON
-    $newJson = ($manifest | ConvertTo-Json -Depth 2 -Compress).Trim()
+    $newJson = (, $manifest | ConvertTo-Json -Depth 2 -Compress).Trim()
 
     # Read existing file (if it exists)
     $existingPath = "$blogDir\files.json"
