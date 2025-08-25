@@ -48,7 +48,7 @@ function Update-BlogManifest {
       $slug = [System.IO.Path]::GetFileNameWithoutExtension($filename)
 
         
-      Write-Host "`n📄 Processing file: $filename"
+      Write-Host "`Processing file: $filename"
 
       try {
         $content = Get-Content $file -Raw
@@ -82,7 +82,7 @@ function Update-BlogManifest {
           }
 
           $manifest += $entry
-          Write-Host "📦 Added entry: $($entry | ConvertTo-Json -Compress)"
+          Write-Host "Added entry: $($entry | ConvertTo-Json -Compress)"
           $filesProcessed++
         } else {
           Write-Host "No YAML frontmatter found in $filename"
@@ -94,9 +94,24 @@ function Update-BlogManifest {
       }
     }
 
-    # Export to JSON
-    @($manifest) | ConvertTo-Json -Depth 2 | Out-File "$blogDir\files.json" -Encoding utf8
-    Write-Host "Blog manifest generated at $blogDir\files.json"
+    # Convert new manifest to JSON
+    $newJson = ([System.Collections.ArrayList]$manifest | ConvertTo-Json -Depth 2 -Compress).Trim()
+
+    # Read existing file (if it exists)
+    $existingPath = "$blogDir\files.json"
+    $oldJson = if (Test-Path $existingPath) {
+        (Get-Content $existingPath -Raw).Trim()
+    } else {
+        ""
+    }
+
+    # Only write if different
+    if ($newJson -ne $oldJson) {
+        $newJson | Out-File $existingPath -Encoding utf8
+        Write-Host "Blog manifest updated: $existingPath"
+    } else {
+        Write-Host "Blog manifest unchanged. Skipping file update."
+    }
 }
 
 
