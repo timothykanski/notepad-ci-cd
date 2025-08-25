@@ -1,5 +1,5 @@
 ---
-title: It's Working!
+title: It's Totally Working!
 date: 2025-08-24
 description: After a flurry of debugging, duct tape, and a few choice words — the Reflex-powered blog is alive.
 ---
