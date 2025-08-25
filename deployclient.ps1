@@ -69,7 +69,7 @@ function Update-BlogManifest {
     }
 
     # Export to JSON
-    $manifest | ConvertTo-Json -Depth 2 | Out-File "$blogDir\files.json" -Encoding utf8
+    @($manifest) | ConvertTo-Json -Depth 2 | Out-File "$blogDir\files.json" -Encoding utf8
     Write-Host "Blog manifest generated at $blogDir\files.json"
 }
 
