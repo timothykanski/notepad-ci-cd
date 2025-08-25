@@ -8,4 +8,4 @@ description: A simple post written in Markdown with reflex-based deployment.
 
 This is my very first blog post.
 
-All I had to do was drop this `.md` file into `/blog` and save.
+To add this post, all I did was drop this `.md` file into `/blog`.
