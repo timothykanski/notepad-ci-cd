@@ -63,7 +63,7 @@ function Update-BlogManifest {
             foreach ($line in $metaBlock -split "`n") {
                 if ($line -match "^\s*(\w+)\s*:\s*(.+)$") {
                     $key = $matches[1]
-                    $value = $matches[2]
+                    $value = $matches[2].Trim()
                     $meta[$key] = $value
                     Write-Host "$key = $value"
                 } else {

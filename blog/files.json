@@ -1,7 +1,7 @@
 ﻿{
     "filename":  "first-post.md",
     "slug":  "first-post",
-    "title":  "My First Reflex Post\r",
-    "date":  "2025-08-24\r",
+    "title":  "My First Reflex Post",
+    "date":  "2025-08-24",
     "description":  "A simple post written in Markdown with reflex-based deployment."
 }
