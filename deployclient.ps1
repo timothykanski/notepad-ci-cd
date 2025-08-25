@@ -36,36 +36,62 @@ function Trigger-Deploy($changeType, $changedFile){
 function Update-BlogManifest {
     $blogDir = "blog"
     $manifest = @()
+    $filesProcessed = 0
+    $filesSkipped = 0
+
+    Write-Host "Scanning for markdown files in '$blogDir'..."
 
     # Loop through all markdown files in /blog
     Get-ChildItem "$blogDir\*.md" | ForEach-Object {
-        $file = $_.FullName
-        $filename = $_.Name
-        $slug = [System.IO.Path]::GetFileNameWithoutExtension($filename)
+      $file = $_.FullName
+      $filename = $_.Name
+      $slug = [System.IO.Path]::GetFileNameWithoutExtension($filename)
 
+        
+      Write-Host "`n📄 Processing file: $filename"
+
+      try {
         $content = Get-Content $file -Raw
 
         # Extract YAML frontmatter
         if ($content -match "^---\s*([\s\S]*?)\s*---") {
             $metaBlock = $matches[1]
+            Write-Host "Found YAML frontmatter block:"
+            Write-Host $metaBlock
+
             $meta = @{}
             foreach ($line in $metaBlock -split "`n") {
                 if ($line -match "^\s*(\w+)\s*:\s*(.+)$") {
                     $key = $matches[1]
                     $value = $matches[2]
                     $meta[$key] = $value
+                    Write-Host "$key = $value"
+                } else {
+                  Write-Host "Skipping malformed line: '$line'"
                 }
             }
 
-            # Build entry
-            $manifest += [PSCustomObject]@{
-                filename    = $filename
-                slug        = $slug
-                title       = $meta.title
-                date        = $meta.date
-                description = $meta.description
-            }
+
+          # Build entry
+          $entry = [PSCustomObject]@{
+            filename    = $filename
+            slug        = $slug
+            title       = $meta.title
+            date        = $meta.date
+            description = $meta.description
+          }
+
+          $manifest += $entry
+          Write-Host "📦 Added entry: $($entry | ConvertTo-Json -Compress)"
+          $filesProcessed++
+        } else {
+          Write-Host "No YAML frontmatter found in $filename"
+          $filesSkipped++
         }
+      } catch {
+        Write-Host "Error reading file ${filename}: $_"
+        $filesSkipped++
+      }
     }
 
     # Export to JSON
