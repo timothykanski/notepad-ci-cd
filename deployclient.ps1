@@ -34,7 +34,7 @@ function Trigger-Deploy($changeType, $changedFile){
 }
 
 function Write-Host-Verbose($msg) {
-  if(false){ #set to true for verbose logging.
+  if(""){ #set to true for verbose logging.
     Write-Host $msg
   }
 }
