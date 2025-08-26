@@ -33,13 +33,19 @@ function Trigger-Deploy($changeType, $changedFile){
     }
 }
 
+function Write-Host-Verbose($msg) {
+  if(false){ #set to true for verbose logging.
+    Write-Host $msg
+  }
+}
+
 function Update-BlogManifest {
     $blogDir = "blog"
     $manifest = @()
     $filesProcessed = 0
     $filesSkipped = 0
 
-    Write-Host "Scanning for markdown files in '$blogDir'..."
+    Write-Host-Verbose "Scanning for markdown files in '$blogDir'..."
 
     # Loop through all markdown files in /blog
     Get-ChildItem "$blogDir\*.md" | ForEach-Object {
@@ -48,7 +54,7 @@ function Update-BlogManifest {
       $slug = [System.IO.Path]::GetFileNameWithoutExtension($filename)
 
         
-      Write-Host "`Processing file: $filename"
+      Write-Host-Verbose "`Processing file: $filename"
 
       try {
         $content = Get-Content $file -Raw
@@ -56,8 +62,8 @@ function Update-BlogManifest {
         # Extract YAML frontmatter
         if ($content -match "^---\s*([\s\S]*?)\s*---") {
             $metaBlock = $matches[1]
-            Write-Host "Found YAML frontmatter block:"
-            Write-Host $metaBlock
+            Write-Host-Verbose "Found YAML frontmatter block:"
+            Write-Host-Verbose $metaBlock
 
             $meta = @{}
             foreach ($line in $metaBlock -split "`n") {
@@ -65,9 +71,9 @@ function Update-BlogManifest {
                     $key = $matches[1]
                     $value = $matches[2].Trim()
                     $meta[$key] = $value
-                    Write-Host "$key = $value"
+                    Write-Host-Verbose "$key = $value"
                 } else {
-                  Write-Host "Skipping malformed line: '$line'"
+                  Write-Host-Verbose "Skipping malformed line: '$line'"
                 }
             }
 
@@ -82,14 +88,14 @@ function Update-BlogManifest {
           }
 
           $manifest += $entry
-          Write-Host "Added entry: $($entry | ConvertTo-Json -Compress)"
+          Write-Host-Verbose "Added entry: $($entry | ConvertTo-Json -Compress)"
           $filesProcessed++
         } else {
-          Write-Host "No YAML frontmatter found in $filename"
+          Write-Host-Verbose "No YAML frontmatter found in $filename"
           $filesSkipped++
         }
       } catch {
-        Write-Host "Error reading file ${filename}: $_"
+        Write-Host-Verbose "Error reading file ${filename}: $_"
         $filesSkipped++
       }
     }
