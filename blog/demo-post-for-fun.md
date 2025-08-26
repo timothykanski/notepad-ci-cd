@@ -8,7 +8,7 @@ description: A rich demo post with markdown examples, code snippets, lists, link
 
 Hey there, fellow human (or curious AI)! 👋  
 This post exists *purely* to demo what your blog can do with good ol' Markdown.  
-If you’re reading this, your static site is probably working — which is reason enough to celebrate.
+If you’re reading this, your static site is probably working — which is reason enough to celebrate.  `Yay!`
 
 ---
 
