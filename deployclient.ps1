@@ -31,6 +31,8 @@ function Trigger-Deploy($changeType, $changedFile){
     } catch {
       Write-Host "Push failed. Try 'git pull' and resolve any merge conflicts."
     }
+
+   $script:$lastSnapshot = Get-ChildItem -Recurse | ForEach-Object { $_.FullName, $_.LastWriteTime }
 }
 
 function Write-Host-Verbose($msg) {
@@ -158,11 +160,10 @@ Write-Host "Watching for file changes in: $($watcher.Path)"
 while ($true) {
  Start-Sleep -Seconds 5
 
- $currentSnapshot = Get-ChildItem -Recurse | ForEach-Object { $_.FullName, $_.LastWriteTime }
+ $script:$currentSnapshot = Get-ChildItem -Recurse | ForEach-Object { $_.FullName, $_.LastWriteTime }
 
  if($currentSnapshot -ne $lastSnapshot){
    Trigger-Deploy "FallbackPoll" "manual-scan"
-   $lastSnapshot = $currentSnapshot
  }
  
 }
